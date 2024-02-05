@@ -1,0 +1,12 @@
+stages:
+- build
+
+build-image:
+  stage: build
+  image: docker:stable
+  script:
+  - docker login -u gitlab-ci-token -p "${CI_JOB_TOKEN}" "${CI_REGISTRY}"
+  - docker build -t "${CI_REGISTRY_IMAGE}/mail_relay:latest" .
+  - docker push "${CI_REGISTRY_IMAGE}/mail_relay:latest"
+  only:
+  - master@Scientific-IT-Systems/administration/mail_relay

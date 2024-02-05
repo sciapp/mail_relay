@@ -1,6 +1,7 @@
 .*
 !.dockerignore
 !.gitignore
+!.gitlab-ci.yml
 *.egg-info/
 *.pyc
 __pycache__/
