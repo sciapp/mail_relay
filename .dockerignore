@@ -1,8 +1,7 @@
 .*
-!.dockerignore
-!.gitignore
 *.egg-info/
 *.pyc
+Dockerfile
 __pycache__/
 build/
 dist/

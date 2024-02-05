@@ -1,0 +1,3 @@
+aiosmtpd==1.4.4.post2
+atpublic==4.0
+attrs==23.2.0
