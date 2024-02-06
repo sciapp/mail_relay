@@ -18,12 +18,11 @@ import os
 import signal
 import ssl
 from enum import Enum, auto
-from smtplib import SMTP as SMTPCLient
-from smtplib import SMTP_SSL as SMTPSSLClient
 from typing import Any, Optional
 
 from aiosmtpd.controller import Controller
 from aiosmtpd.smtp import AuthResult, LoginPassword
+from aiosmtplib import SMTP as SMTPClient
 
 __version_info__ = (0, 1, 0)
 __version__ = ".".join(map(str, __version_info__))
@@ -115,16 +114,19 @@ class RelayHandler:
         self._password = password
 
     async def handle_DATA(self, _server, _session, envelope):
-        smtp_class = SMTPSSLClient if self._encryption is MailEncryption.TLS else SMTPCLient
-        with smtp_class(self._server_name, self._port) as client:
+        # `start_tls=False` only indicates that no automatic STARTTLS upgrade should be performed
+        smtp_client = SMTPClient(
+            hostname=self._server_name, port=self._port, use_tls=self._encryption is MailEncryption.TLS, start_tls=False
+        )
+        async with smtp_client:
             logger.info("Relaying mail to %s", self._server_name)
             if self._encryption is MailEncryption.STARTTLS:
-                client.starttls()
+                await smtp_client.starttls()
             if self._username is not None and self._password is not None:
                 if self._encryption is MailEncryption.NONE:
                     logger.warning("Sending login credentials without encryption is insecure.")
-                client.login(self._username, self._password)
-            client.sendmail(from_addr=envelope.mail_from, to_addrs=envelope.rcpt_tos, msg=envelope.original_content)
+                await smtp_client.login(self._username, self._password)
+            await smtp_client.sendmail(envelope.mail_from, envelope.rcpt_tos, envelope.original_content)
         return "250 Message accepted for delivery"
 
 
