@@ -161,9 +161,11 @@ def create_mail_relay() -> Controller:
     controller = Controller(
         handler,
         hostname="",
-        port=THIS_SERVER.port
-        if THIS_SERVER.port is not None
-        else get_default_port_from_encryption(THIS_SERVER.encryption),
+        port=(
+            THIS_SERVER.port
+            if THIS_SERVER.port is not None
+            else get_default_port_from_encryption(THIS_SERVER.encryption)
+        ),
         authenticator=Authenticator(str(THIS_SERVER.username), str(THIS_SERVER.password)) if auth_required else None,
         auth_required=auth_required,
         auth_require_tls=THIS_SERVER.encryption is not MailEncryption.NONE,
